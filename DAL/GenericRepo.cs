@@ -1,10 +1,14 @@
-﻿using IntexPractice.DAL;
+using INTEX2.DAL;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Threading.Tasks;
+
 
 namespace INTEX2.DAL
 {
@@ -13,6 +17,7 @@ namespace INTEX2.DAL
     /// </summary>
     public class GenericRepo<T> : IGenericRepository<T> where T : class
     {
+
         internal FagElGamousDbContext _context;
         internal DbSet<T> _dbSet;
         private ILogger<T> _logger;
@@ -35,11 +40,13 @@ namespace INTEX2.DAL
             _logger.LogInformation("{@AddObject} passed int", addObject);
             _dbSet.Add(addObject);
             _logger.LogInformation("{@AddObject} was added", addObject);
+
         }
 
         /// <summary>
         /// Generic method to add multiple <typeparamref name="T"/>s to the DB.
         /// </summary>
+
         /// <param name="addObjects">IEnumerable of <typeparamref name="T"/> to add.</param>
         public virtual void BulkInsert(IEnumerable<T> addObjects)
         {
@@ -49,13 +56,16 @@ namespace INTEX2.DAL
         }
 
         // Read Methods
+
         /// <summary>
         /// Generic method to retrieves all <typeparamref name="T"/> records.
         /// </summary>
         /// <returns>IEnumerable of type T.</returns>
         public virtual IEnumerable<T> GetAll()
         {
+
             _logger.LogInformation("{ReturnedObjectsCount} {ObjectType}s returned", _dbSet.Count(), typeof(T));
+
             return _dbSet.AsEnumerable();
         }
 
@@ -67,15 +77,19 @@ namespace INTEX2.DAL
         public virtual IEnumerable<T> GetAll(
             params Expression<Func<T, object>>[] includes)
         {
+
             _logger.LogInformation("{IncludeFuncs} were passed in", includes);
+
             IQueryable<T> query = _dbSet.Include(includes[0]);
             foreach (var includeObject in includes.Skip(1))
             {
                 query = query.Include(includeObject);
+
                 _logger.LogInformation("{Include} processed", includeObject);
             }
             _logger.LogInformation("{ReturnedObjectsCount} {ObjectType}s returned with {IncludeFuncs} included",
                 query.Count(), typeof(T), includes);
+
             return query.AsEnumerable();
         }
 
@@ -86,6 +100,7 @@ namespace INTEX2.DAL
         /// <returns><typeparamref name="T"/> with PK of <paramref name="id"/>.</returns>
         public virtual T GetByID(long id)
         {
+
             _logger.LogInformation("{FindId} passed in", id);
             return _dbSet.Find(id);
         }
@@ -119,6 +134,33 @@ namespace INTEX2.DAL
             }
             _dbSet.Remove(deleteObject);
             _logger.LogInformation("{@DeleteObject} removed", deleteObject);
+
+            return _dbSet.Find(id);
+        }
+
+        /// <summary>
+        /// Generic method to update a <typeparamref name="T"/> in the DB.
+        /// </summary>
+        /// <param name="objectToUpdate"><typeparamref name="T"/> to update.</param>
+        public virtual void Update(T objectToUpdate)
+        {
+            _dbSet.Attach(objectToUpdate);
+            _context.Entry(objectToUpdate).State = EntityState.Modified;
+        }
+
+        /// <summary>
+        /// Generic method to delete a <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="objectToDelete"><typeparamref name="T"/> to delete from the DB.</param>
+        // TODO Add error handling if an invalid object is passed.
+        public virtual void Delete(T objectToDelete)
+        {
+            if (_context.Entry(objectToDelete).State == EntityState.Detached)
+            {
+                _dbSet.Attach(objectToDelete);
+            }
+            _dbSet.Remove(objectToDelete);
+
         }
 
         /// <summary>

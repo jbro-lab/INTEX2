@@ -1,6 +1,7 @@
-﻿using INTEX2.DAL;
+using INTEX2.DAL;
 using INTEX2.Models;
 using Microsoft.Extensions.Logging;
+
 
 namespace INTEX2.DAL
 {
@@ -12,13 +13,16 @@ namespace INTEX2.DAL
         /// <summary>
         /// DbContext to be shared by all Repos in this Unit Of Work. Prevents concurrency issues.
         /// </summary>
+
         private FagElGamousDbContext _context;
         private readonly ILogger _logger;
         private ILoggerFactory _loggerFactory;
 
+
         /// <summary>
         /// Generic Repo for interacting with all Bowlers.
         /// </summary>
+
 
         public UnitOfWork(FagElGamousDbContext context, ILoggerFactory loggerFactory)
         {
@@ -27,6 +31,11 @@ namespace INTEX2.DAL
             _loggerFactory = loggerFactory;
             _logger = _loggerFactory.CreateLogger<UnitOfWork>();
             _logger.LogInformation("Unit of Work with DbContext {DbContext} created}", _context.ContextId);
+
+        public UnitOfWork(ApplicationDbContext context)
+        {
+            _context = context;
+
         }
 
 

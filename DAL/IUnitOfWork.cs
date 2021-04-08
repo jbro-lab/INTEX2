@@ -1,5 +1,7 @@
-﻿using INTEX2.DAL;
+using INTEX2.DAL;
 using INTEX2.Models;
+
+
 
 namespace INTEX2.DAL
 {
