@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +36,14 @@ namespace INTEX2
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            Log.Logger = new LoggerConfiguration()
+                                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                                .MinimumLevel.Override("INTEX2", LogEventLevel.Information)
+                                .WriteTo.Console()
+                                .WriteTo.Debug()
+                                .CreateLogger();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
