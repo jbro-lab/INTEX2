@@ -1,5 +1,6 @@
 using INTEX2.DAL;
 using INTEX2.Data;
+using INTEX2.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -31,19 +32,25 @@ namespace INTEX2
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // TODO Add AWS RDS connection string
             services.AddDbContext<AuthenticationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("AuthenicationSqlServer")
             ));
 
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                    .AddEntityFrameworkStores<AuthenticationDbContext>()
+                    .AddDefaultUI()
+                    .AddDefaultTokenProviders();
+
             // TODO Add AWS RDS connection string
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<INTEX2.DAL.ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(Configuration["ApplicationDbContext"]);
             });
-
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<AuthenticationDbContext>();
 
             services.AddControllersWithViews();
 
@@ -51,7 +58,7 @@ namespace INTEX2
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
-
+        
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
