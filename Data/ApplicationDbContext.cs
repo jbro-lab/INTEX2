@@ -6,9 +6,9 @@ using System.Text;
 
 namespace INTEX2.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class AuthenticationDbContext : IdentityDbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public AuthenticationDbContext(DbContextOptions<AuthenticationDbContext> options)
             : base(options)
         {
         }
