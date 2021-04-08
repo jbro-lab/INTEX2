@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using INTEX2.DAL;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 using System;
@@ -8,6 +9,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 
+
 namespace INTEX2.DAL
 {
     /// <summary>
@@ -15,32 +17,45 @@ namespace INTEX2.DAL
     /// </summary>
     public class GenericRepo<T> : IGenericRepository<T> where T : class
     {
-        internal ApplicationDbContext _context;
-        internal DbSet<T> _dbSet;
 
-        public GenericRepo(ApplicationDbContext context)
+        internal FagElGamousDbContext _context;
+        internal DbSet<T> _dbSet;
+        private ILogger<T> _logger;
+
+        public GenericRepo(FagElGamousDbContext context, ILogger<T> logger)
         {
             _context = context;
             _dbSet = context.Set<T>();
+            _logger = logger;
+            _logger.LogInformation("{Type} repo with DbContext {ContextID} created", typeof(T), _context.ContextId);
         }
 
+        // Create Methods
         /// <summary>
         /// Generic method to add a <typeparamref name="T"/> to the DbSet.
         /// </summary>
-        /// <param name="objectToInsert"><typeparamref name="T"/> to add.</param>
-        public virtual void Insert(T objectToInsert)
+        /// <param name="insertObject"><typeparamref name="T"/> to add.</param>
+        public virtual void Insert(T addObject)
         {
-            _dbSet.Add(objectToInsert);
+            _logger.LogInformation("{@AddObject} passed int", addObject);
+            _dbSet.Add(addObject);
+            _logger.LogInformation("{@AddObject} was added", addObject);
+
         }
 
         /// <summary>
         /// Generic method to add multiple <typeparamref name="T"/>s to the DB.
         /// </summary>
-        /// <param name="objectsToAdd">IEnumerable of <typeparamref name="T"/> to add.</param>
-        public virtual void BulkInsert(IEnumerable<T> objectsToAdd)
+
+        /// <param name="addObjects">IEnumerable of <typeparamref name="T"/> to add.</param>
+        public virtual void BulkInsert(IEnumerable<T> addObjects)
         {
-            _dbSet.AddRange(objectsToAdd);
+            _logger.LogInformation("{TotalObjects} were passed in", addObjects.Count());
+            _dbSet.AddRange(addObjects);
+            _logger.LogInformation("{TotalObjects} were added", addObjects.Count());
         }
+
+        // Read Methods
 
         /// <summary>
         /// Generic method to retrieves all <typeparamref name="T"/> records.
@@ -48,6 +63,9 @@ namespace INTEX2.DAL
         /// <returns>IEnumerable of type T.</returns>
         public virtual IEnumerable<T> GetAll()
         {
+
+            _logger.LogInformation("{ReturnedObjectsCount} {ObjectType}s returned", _dbSet.Count(), typeof(T));
+
             return _dbSet.AsEnumerable();
         }
 
@@ -59,11 +77,19 @@ namespace INTEX2.DAL
         public virtual IEnumerable<T> GetAll(
             params Expression<Func<T, object>>[] includes)
         {
+
+            _logger.LogInformation("{IncludeFuncs} were passed in", includes);
+
             IQueryable<T> query = _dbSet.Include(includes[0]);
             foreach (var includeObject in includes.Skip(1))
             {
                 query = query.Include(includeObject);
+
+                _logger.LogInformation("{Include} processed", includeObject);
             }
+            _logger.LogInformation("{ReturnedObjectsCount} {ObjectType}s returned with {IncludeFuncs} included",
+                query.Count(), typeof(T), includes);
+
             return query.AsEnumerable();
         }
 
@@ -74,6 +100,41 @@ namespace INTEX2.DAL
         /// <returns><typeparamref name="T"/> with PK of <paramref name="id"/>.</returns>
         public virtual T GetByID(long id)
         {
+
+            _logger.LogInformation("{FindId} passed in", id);
+            return _dbSet.Find(id);
+        }
+
+        // Update Methods
+        /// <summary>
+        /// Generic method to update a <typeparamref name="T"/> in the DB.
+        /// </summary>
+        /// <param name="updateObject"><typeparamref name="T"/> to update.</param>
+        public virtual void Update(T updateObject)
+        {
+            _logger.LogInformation("{@UpdateObject} passed in", updateObject);
+            _dbSet.Attach(updateObject);
+            _context.Entry(updateObject).State = EntityState.Modified;
+            _logger.LogInformation("{@UdpateObject} updated sucessfully", updateObject);
+        }
+
+        // Delete Methods
+        /// <summary>
+        /// Generic method to delete a <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="deleteObject"><typeparamref name="T"/> to delete from the DB.</param>
+        // TODO Add error handling if an invalid object is passed.
+        public virtual void Delete(T deleteObject)
+        {
+            _logger.LogInformation("{@DeleteObject} was passed in", deleteObject);
+            if (_context.Entry(deleteObject).State == EntityState.Detached)
+            {
+                _dbSet.Attach(deleteObject);
+                _logger.LogInformation("{@DeleteObject} attached", deleteObject);
+            }
+            _dbSet.Remove(deleteObject);
+            _logger.LogInformation("{@DeleteObject} removed", deleteObject);
+
             return _dbSet.Find(id);
         }
 
@@ -99,6 +160,7 @@ namespace INTEX2.DAL
                 _dbSet.Attach(objectToDelete);
             }
             _dbSet.Remove(objectToDelete);
+
         }
 
         /// <summary>
@@ -108,8 +170,10 @@ namespace INTEX2.DAL
         // TODO Add error handling if a wrong id is passed.
         public virtual void Delete(long id)
         {
-            T objectToDelete = _dbSet.Find(id);
-            _dbSet.Remove(objectToDelete);
+            _logger.LogInformation("{DeleteId} was passed in", id);
+            T deleteObject = _dbSet.Find(id);
+            _dbSet.Remove(deleteObject);
+            _logger.LogInformation("{@DeleteObject} was removed", deleteObject);
         }
     }
 }

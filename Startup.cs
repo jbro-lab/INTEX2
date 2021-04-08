@@ -35,19 +35,16 @@ namespace INTEX2
             // TODO Add AWS RDS connection string
             services.AddDbContext<AuthenticationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration["ConnectionStrings:AuthenicationSqlServer"]
+                    Configuration["ConnectionStrings:AuthenticationSqlServer"]
             ));
-
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<AuthenticationDbContext>()
                     .AddDefaultUI()
                     .AddDefaultTokenProviders();
 
-            // TODO Add AWS RDS connection string
-            services.AddDbContext<INTEX2.DAL.ApplicationDbContext>(options =>
+            // Adds the DbContext to access application data
+            services.AddDbContext<FagElGamousDbContext>(options =>
             {
                 options.UseSqlServer(Configuration["ConnectionStrings:ApplicationSqlServer"]);
             });
@@ -55,6 +52,12 @@ namespace INTEX2
             services.AddControllersWithViews();
 
             services.AddRazorPages();
+
+
+            // Adds the Unit Of Work for the Controller.
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+        }
+
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
