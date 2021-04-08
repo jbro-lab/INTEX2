@@ -35,7 +35,7 @@ namespace INTEX2
             // TODO Add AWS RDS connection string
             services.AddDbContext<AuthenticationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("AuthenicationSqlServer")
+                    Configuration["ConnectionStrings:AuthenicationSqlServer"]
             ));
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -49,7 +49,7 @@ namespace INTEX2
             // TODO Add AWS RDS connection string
             services.AddDbContext<INTEX2.DAL.ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(Configuration["ApplicationDbContext"]);
+                options.UseSqlServer(Configuration["ConnectionStrings:ApplicationSqlServer"]);
             });
 
             services.AddControllersWithViews();
