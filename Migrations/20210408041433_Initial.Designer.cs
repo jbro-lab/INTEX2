@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace INTEX2.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210408041433_Initial")]
-    partial class Initial
+    [DbContext(typeof(AuthenticationDbContext))]
+    [Migration("00000000000000_CreateIdentitySchema")]
+    partial class CreateIdentitySchema
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

@@ -1,3 +1,4 @@
+using INTEX2.DAL;
 using INTEX2.Data;
 using INTEX2.Models;
 using Microsoft.AspNetCore.Builder;
@@ -18,23 +19,44 @@ namespace INTEX2
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            _env = env;
         }
 
         public IConfiguration Configuration { get; }
 
+        private readonly IWebHostEnvironment _env;
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            // TODO Add AWS RDS connection string
+            services.AddDbContext<AuthenticationDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("AuthenicationSqlServer")
+            ));
+
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+
             services.AddIdentity<ApplicationUser, IdentityRole>()
-                    .AddEntityFrameworkStores<ApplicationDbContext>()
+                    .AddEntityFrameworkStores<AuthenticationDbContext>()
                     .AddDefaultUI()
                     .AddDefaultTokenProviders();
+
+            // TODO Add AWS RDS connection string
+            services.AddDbContext<INTEX2.DAL.ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration["ApplicationDbContext"]);
+            });
+
             services.AddControllersWithViews();
+
             services.AddRazorPages();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
         
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
