@@ -1,3 +1,4 @@
+using INTEX2.DAL;
 using INTEX2.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,8 +33,18 @@ namespace INTEX2
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // Adds the DbContext to access application data
+            services.AddDbContext<FagElGamousDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration["ConnectionStrings:ApplicationSqlServer"]);
+            });
+
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            // Adds the Unit Of Work for the Controller.
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -2,7 +2,7 @@
 using INTEX2.Models;
 using Microsoft.Extensions.Logging;
 
-namespace IntexPractice.DAL
+namespace INTEX2.DAL
 {
     /// <summary>
     /// Unit Of Work class. Implements the IUnitOfWork members.
@@ -12,7 +12,7 @@ namespace IntexPractice.DAL
         /// <summary>
         /// DbContext to be shared by all Repos in this Unit Of Work. Prevents concurrency issues.
         /// </summary>
-        private FagElGamousDbCOntext _context;
+        private FagElGamousDbContext _context;
         private readonly ILogger _logger;
         private ILoggerFactory _loggerFactory;
 
@@ -20,7 +20,7 @@ namespace IntexPractice.DAL
         /// Generic Repo for interacting with all Bowlers.
         /// </summary>
 
-        public UnitOfWork(FagElGamousDbCOntext context, ILoggerFactory loggerFactory)
+        public UnitOfWork(FagElGamousDbContext context, ILoggerFactory loggerFactory)
         {
 
             _context = context;

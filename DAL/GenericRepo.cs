@@ -13,11 +13,11 @@ namespace INTEX2.DAL
     /// </summary>
     public class GenericRepo<T> : IGenericRepository<T> where T : class
     {
-        internal FagElGamousDbCOntext _context;
+        internal FagElGamousDbContext _context;
         internal DbSet<T> _dbSet;
         private ILogger<T> _logger;
 
-        public GenericRepo(FagElGamousDbCOntext context, ILogger<T> logger)
+        public GenericRepo(FagElGamousDbContext context, ILogger<T> logger)
         {
             _context = context;
             _dbSet = context.Set<T>();

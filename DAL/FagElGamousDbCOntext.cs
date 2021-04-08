@@ -7,13 +7,13 @@ using INTEX2.Models;
 
 namespace INTEX2.DAL
 {
-    public partial class FagElGamousDbCOntext : DbContext
+    public partial class FagElGamousDbContext : DbContext
     {
-        public FagElGamousDbCOntext()
+        public FagElGamousDbContext()
         {
         }
 
-        public FagElGamousDbCOntext(DbContextOptions<FagElGamousDbCOntext> options)
+        public FagElGamousDbContext(DbContextOptions<FagElGamousDbContext> options)
             : base(options)
         { }
     }
